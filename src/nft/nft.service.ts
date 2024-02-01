@@ -3,12 +3,12 @@ import { Nft, Prisma, Role } from '@prisma/client';
 import { JwtPayLoad } from 'src/auth/interfaces';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { EditNftDto } from './nft.dto';
+import { StakingService } from 'src/stacking/stacking.service';
 
 @Injectable()
 export class NftService {
-
-
-    constructor(private prismaService: PrismaService) { }
+    constructor(private prismaService: PrismaService,
+        private stakingService: StakingService) { }
 
 
 
@@ -79,7 +79,15 @@ export class NftService {
     }
 
 
-
+    async stake(userId: string, nftCardId: string, amount: string, adminParameters: Record<string, any>): Promise<void> {
+        const nftCard = await this.prismaService.nft.findUnique({ where: { nftId: nftCardId } });
+    
+        if (!nftCard) {
+          throw new Error('NFT card not found');
+        }
+    
+        await this.stakingService.stake(userId, nftCardId, amount, adminParameters);
+      }
 
 
 

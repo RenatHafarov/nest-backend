@@ -9,6 +9,7 @@ import { PrismaService } from 'src/prisma/prisma.service';
 
 @Controller('nft')
 export class NftController {
+    stakingService: any;
 
 
     constructor(private nftService: NftService,
@@ -22,11 +23,13 @@ export class NftController {
         return this.prismaService.nft.findMany();
     }
 
-
     @Get()
     async find(@Query() filters: { categoryes?: string; name?: string; price?: string; stacking?: number; }) {
         return this.nftService.find(filters);
     }
+
+
+   
 
     @UseGuards(RolesGuard)
     @Roles(Role.ADMIN)

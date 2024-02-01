@@ -255,20 +255,31 @@ const prisma_module_1 = __webpack_require__(/*! ./prisma/prisma.module */ "./src
 const users_module_1 = __webpack_require__(/*! ./users/users.module */ "./src/users/users.module.ts");
 const nft_controller_1 = __webpack_require__(/*! ./nft/nft.controller */ "./src/nft/nft.controller.ts");
 const nft_service_1 = __webpack_require__(/*! ./nft/nft.service */ "./src/nft/nft.service.ts");
+const nft_module_1 = __webpack_require__(/*! ./nft/nft.module */ "./src/nft/nft.module.ts");
+const stacking_module_1 = __webpack_require__(/*! ./stacking/stacking.module */ "./src/stacking/stacking.module.ts");
+const stacking_service_1 = __webpack_require__(/*! ./stacking/stacking.service */ "./src/stacking/stacking.service.ts");
+const stacking_controller_1 = __webpack_require__(/*! ./stacking/stacking.controller */ "./src/stacking/stacking.controller.ts");
+const nftcategoryes_service_1 = __webpack_require__(/*! ./nftcategoryes/nftcategoryes.service */ "./src/nftcategoryes/nftcategoryes.service.ts");
+const nftcategoryes_controller_1 = __webpack_require__(/*! ./nftcategoryes/nftcategoryes.controller */ "./src/nftcategoryes/nftcategoryes.controller.ts");
+const nftcategoryes_module_1 = __webpack_require__(/*! ./nftcategoryes/nftcategoryes.module */ "./src/nftcategoryes/nftcategoryes.module.ts");
+const auto_stacking_1 = __webpack_require__(/*! ./stacking/auto.stacking */ "./src/stacking/auto.stacking.ts");
 let AppModule = class AppModule {
 };
 exports.AppModule = AppModule;
 exports.AppModule = AppModule = __decorate([
     (0, common_1.Module)({
-        imports: [users_module_1.UsersModule, prisma_module_1.PrismaModule, auth_module_1.AuthModule, config_1.ConfigModule.forRoot({ isGlobal: true })],
+        imports: [users_module_1.UsersModule, prisma_module_1.PrismaModule, auth_module_1.AuthModule, config_1.ConfigModule.forRoot({ isGlobal: true }), nft_module_1.NftModule, nftcategoryes_module_1.NftcategoryesModule, stacking_module_1.StackingModule],
         providers: [
             {
                 provide: core_1.APP_GUARD,
                 useClass: jwt_auth_guard_1.JwtAuthGuard,
             },
             nft_service_1.NftService,
+            nftcategoryes_service_1.NftcategoryesService,
+            stacking_service_1.StakingService,
+            auto_stacking_1.AutoStakingService
         ],
-        controllers: [nft_controller_1.NftController],
+        controllers: [nft_controller_1.NftController, nftcategoryes_controller_1.NftcategoryesController, nftcategoryes_controller_1.NftcategoryesController, stacking_controller_1.StakingController],
     })
 ], AppModule);
 
@@ -941,13 +952,16 @@ let NftController = class NftController {
         this.nftService = nftService;
         this.prismaService = prismaService;
     }
-    findAll() {
+    async findAll() {
         return this.prismaService.nft.findMany();
     }
-    createNft(dto, user) {
+    async find(filters) {
+        return this.nftService.find(filters);
+    }
+    async createNft(dto, user) {
         return this.nftService.createNft(dto, user);
     }
-    editNft(id, user, dto) {
+    async editNft(id, user, dto) {
         return this.nftService.editNft(id, user, dto);
     }
     async deleteNft(id, user) {
@@ -959,8 +973,15 @@ __decorate([
     (0, common_1.Get)(),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", []),
-    __metadata("design:returntype", void 0)
+    __metadata("design:returntype", Promise)
 ], NftController.prototype, "findAll", null);
+__decorate([
+    (0, common_1.Get)(),
+    __param(0, (0, common_1.Query)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", Promise)
+], NftController.prototype, "find", null);
 __decorate([
     (0, common_1.UseGuards)(roles_guard_1.RolesGuard),
     (0, decorators_1.Roles)(client_1.Role.ADMIN),
@@ -968,7 +989,7 @@ __decorate([
     __param(1, (0, decorators_1.CurrentUser)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [typeof (_c = typeof nft_dto_1.CreateNftDto !== "undefined" && nft_dto_1.CreateNftDto) === "function" ? _c : Object, typeof (_d = typeof interfaces_1.JwtPayLoad !== "undefined" && interfaces_1.JwtPayLoad) === "function" ? _d : Object]),
-    __metadata("design:returntype", void 0)
+    __metadata("design:returntype", Promise)
 ], NftController.prototype, "createNft", null);
 __decorate([
     (0, common_1.UseGuards)(roles_guard_1.RolesGuard),
@@ -978,7 +999,7 @@ __decorate([
     __param(1, (0, decorators_1.CurrentUser)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String, typeof (_e = typeof interfaces_1.JwtPayLoad !== "undefined" && interfaces_1.JwtPayLoad) === "function" ? _e : Object, typeof (_f = typeof nft_dto_1.EditNftDto !== "undefined" && nft_dto_1.EditNftDto) === "function" ? _f : Object]),
-    __metadata("design:returntype", void 0)
+    __metadata("design:returntype", Promise)
 ], NftController.prototype, "editNft", null);
 __decorate([
     (0, common_1.UseGuards)(roles_guard_1.RolesGuard),
@@ -1036,6 +1057,11 @@ __decorate([
     __metadata("design:type", String)
 ], CreateNftDto.prototype, "categoryes", void 0);
 __decorate([
+    (0, class_validator_1.IsNumber)(),
+    (0, class_validator_1.IsNotEmpty)(),
+    __metadata("design:type", Number)
+], CreateNftDto.prototype, "stacking", void 0);
+__decorate([
     (0, class_validator_1.IsString)(),
     (0, class_validator_1.IsNotEmpty)(),
     __metadata("design:type", String)
@@ -1049,6 +1075,11 @@ __decorate([
     __metadata("design:type", String)
 ], EditNftDto.prototype, "price", void 0);
 __decorate([
+    (0, class_validator_1.IsInt)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", Number)
+], EditNftDto.prototype, "stacking", void 0);
+__decorate([
     (0, class_validator_1.IsString)(),
     (0, class_validator_1.IsNotEmpty)(),
     __metadata("design:type", String)
@@ -1058,6 +1089,32 @@ __decorate([
     (0, class_validator_1.IsOptional)(),
     __metadata("design:type", String)
 ], EditNftDto.prototype, "description", void 0);
+
+
+/***/ }),
+
+/***/ "./src/nft/nft.module.ts":
+/*!*******************************!*\
+  !*** ./src/nft/nft.module.ts ***!
+  \*******************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.NftModule = void 0;
+const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+let NftModule = class NftModule {
+};
+exports.NftModule = NftModule;
+exports.NftModule = NftModule = __decorate([
+    (0, common_1.Module)({})
+], NftModule);
 
 
 /***/ }),
@@ -1078,26 +1135,40 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
-var _a;
+var _a, _b;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.NftService = void 0;
 const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
 const client_1 = __webpack_require__(/*! @prisma/client */ "@prisma/client");
 const prisma_service_1 = __webpack_require__(/*! src/prisma/prisma.service */ "./src/prisma/prisma.service.ts");
+const stacking_service_1 = __webpack_require__(/*! src/stacking/stacking.service */ "./src/stacking/stacking.service.ts");
 let NftService = class NftService {
-    constructor(prismaService) {
+    constructor(prismaService, stakingService) {
         this.prismaService = prismaService;
+        this.stakingService = stakingService;
     }
     async createNft(nft, user) {
         if (!user.roles.includes(client_1.Role.ADMIN)) {
             throw new common_1.ForbiddenException();
         }
+        this.prismaService.category.create({
+            data: {
+                name: nft.categoryes,
+                nftid: nft.nftId
+            }
+        });
         return this.prismaService.nft.create({
             data: {
                 name: nft.name,
                 categoryes: nft.categoryes,
-                description: nft.description
+                description: nft.description,
+                stacking: nft.stacking
             }
+        });
+    }
+    async find(filters) {
+        return this.prismaService.nft.findMany({
+            where: filters,
         });
     }
     async editNft(id, user, dto) {
@@ -1119,12 +1190,252 @@ let NftService = class NftService {
         }
         return this.prismaService.nft.delete({ where: { nftId: nftid } });
     }
+    async stake(userId, nftCardId, amount, adminParameters) {
+        const nftCard = await this.prismaService.nft.findUnique({ where: { nftId: nftCardId } });
+        if (!nftCard) {
+            throw new Error('NFT card not found');
+        }
+        await this.stakingService.stake(userId, nftCardId, amount, adminParameters);
+    }
 };
 exports.NftService = NftService;
 exports.NftService = NftService = __decorate([
     (0, common_1.Injectable)(),
-    __metadata("design:paramtypes", [typeof (_a = typeof prisma_service_1.PrismaService !== "undefined" && prisma_service_1.PrismaService) === "function" ? _a : Object])
+    __metadata("design:paramtypes", [typeof (_a = typeof prisma_service_1.PrismaService !== "undefined" && prisma_service_1.PrismaService) === "function" ? _a : Object, typeof (_b = typeof stacking_service_1.StakingService !== "undefined" && stacking_service_1.StakingService) === "function" ? _b : Object])
 ], NftService);
+
+
+/***/ }),
+
+/***/ "./src/nftcategoryes/nftcategoryes.controller.ts":
+/*!*******************************************************!*\
+  !*** ./src/nftcategoryes/nftcategoryes.controller.ts ***!
+  \*******************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var __param = (this && this.__param) || function (paramIndex, decorator) {
+    return function (target, key) { decorator(target, key, paramIndex); }
+};
+var _a, _b, _c, _d, _e, _f, _g;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.NftcategoryesController = void 0;
+const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+const prisma_service_1 = __webpack_require__(/*! src/prisma/prisma.service */ "./src/prisma/prisma.service.ts");
+const nftcategoryes_service_1 = __webpack_require__(/*! ./nftcategoryes.service */ "./src/nftcategoryes/nftcategoryes.service.ts");
+const roles_guard_1 = __webpack_require__(/*! src/auth/guards/roles.guard */ "./src/auth/guards/roles.guard.ts");
+const decorators_1 = __webpack_require__(/*! @common/common/decorators */ "./libs/common/src/decorators/index.ts");
+const client_1 = __webpack_require__(/*! @prisma/client */ "@prisma/client");
+const nftcategoryes_dto_1 = __webpack_require__(/*! ./nftcategoryes.dto */ "./src/nftcategoryes/nftcategoryes.dto.ts");
+const interfaces_1 = __webpack_require__(/*! src/auth/interfaces */ "./src/auth/interfaces.ts");
+let NftcategoryesController = class NftcategoryesController {
+    constructor(categoryesService, prismaService) {
+        this.categoryesService = categoryesService;
+        this.prismaService = prismaService;
+    }
+    async findAll() {
+        return this.prismaService.category.findMany();
+    }
+    async createCategory(dto, user) {
+        return this.categoryesService.createCategory(dto, user);
+    }
+    async editCategory(id, user, dto) {
+        return this.categoryesService.editCateory(id, user, dto);
+    }
+    async deleteCategory(id, user) {
+        return this.categoryesService.deleteCaregory(id, user);
+    }
+};
+exports.NftcategoryesController = NftcategoryesController;
+__decorate([
+    (0, common_1.Get)(),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", Promise)
+], NftcategoryesController.prototype, "findAll", null);
+__decorate([
+    (0, common_1.UseGuards)(roles_guard_1.RolesGuard),
+    (0, decorators_1.Roles)(client_1.Role.ADMIN),
+    (0, common_1.Post)(),
+    __param(1, (0, decorators_1.CurrentUser)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [typeof (_c = typeof nftcategoryes_dto_1.CreateCategoryDto !== "undefined" && nftcategoryes_dto_1.CreateCategoryDto) === "function" ? _c : Object, typeof (_d = typeof interfaces_1.JwtPayLoad !== "undefined" && interfaces_1.JwtPayLoad) === "function" ? _d : Object]),
+    __metadata("design:returntype", Promise)
+], NftcategoryesController.prototype, "createCategory", null);
+__decorate([
+    (0, common_1.UseGuards)(roles_guard_1.RolesGuard),
+    (0, decorators_1.Roles)(client_1.Role.ADMIN),
+    (0, common_1.Post)(':id'),
+    __param(0, (0, common_1.Param)('id', common_1.ParseUUIDPipe)),
+    __param(1, (0, decorators_1.CurrentUser)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, typeof (_e = typeof interfaces_1.JwtPayLoad !== "undefined" && interfaces_1.JwtPayLoad) === "function" ? _e : Object, typeof (_f = typeof nftcategoryes_dto_1.EditCategoryDto !== "undefined" && nftcategoryes_dto_1.EditCategoryDto) === "function" ? _f : Object]),
+    __metadata("design:returntype", Promise)
+], NftcategoryesController.prototype, "editCategory", null);
+__decorate([
+    (0, common_1.UseGuards)(roles_guard_1.RolesGuard),
+    (0, decorators_1.Roles)(client_1.Role.ADMIN),
+    (0, common_1.Delete)(':id'),
+    __param(0, (0, common_1.Param)('id', common_1.ParseUUIDPipe)),
+    __param(1, (0, decorators_1.CurrentUser)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, typeof (_g = typeof interfaces_1.JwtPayLoad !== "undefined" && interfaces_1.JwtPayLoad) === "function" ? _g : Object]),
+    __metadata("design:returntype", Promise)
+], NftcategoryesController.prototype, "deleteCategory", null);
+exports.NftcategoryesController = NftcategoryesController = __decorate([
+    (0, common_1.Controller)('nftcategoryes'),
+    __metadata("design:paramtypes", [typeof (_a = typeof nftcategoryes_service_1.NftcategoryesService !== "undefined" && nftcategoryes_service_1.NftcategoryesService) === "function" ? _a : Object, typeof (_b = typeof prisma_service_1.PrismaService !== "undefined" && prisma_service_1.PrismaService) === "function" ? _b : Object])
+], NftcategoryesController);
+
+
+/***/ }),
+
+/***/ "./src/nftcategoryes/nftcategoryes.dto.ts":
+/*!************************************************!*\
+  !*** ./src/nftcategoryes/nftcategoryes.dto.ts ***!
+  \************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.EditCategoryDto = exports.CreateCategoryDto = void 0;
+const class_validator_1 = __webpack_require__(/*! class-validator */ "class-validator");
+class CreateCategoryDto {
+}
+exports.CreateCategoryDto = CreateCategoryDto;
+__decorate([
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsNotEmpty)(),
+    __metadata("design:type", String)
+], CreateCategoryDto.prototype, "name", void 0);
+__decorate([
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsNotEmpty)(),
+    __metadata("design:type", String)
+], CreateCategoryDto.prototype, "nftid", void 0);
+class EditCategoryDto {
+}
+exports.EditCategoryDto = EditCategoryDto;
+__decorate([
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", String)
+], EditCategoryDto.prototype, "name", void 0);
+__decorate([
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", String)
+], EditCategoryDto.prototype, "nftid", void 0);
+
+
+/***/ }),
+
+/***/ "./src/nftcategoryes/nftcategoryes.module.ts":
+/*!***************************************************!*\
+  !*** ./src/nftcategoryes/nftcategoryes.module.ts ***!
+  \***************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.NftcategoryesModule = void 0;
+const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+let NftcategoryesModule = class NftcategoryesModule {
+};
+exports.NftcategoryesModule = NftcategoryesModule;
+exports.NftcategoryesModule = NftcategoryesModule = __decorate([
+    (0, common_1.Module)({})
+], NftcategoryesModule);
+
+
+/***/ }),
+
+/***/ "./src/nftcategoryes/nftcategoryes.service.ts":
+/*!****************************************************!*\
+  !*** ./src/nftcategoryes/nftcategoryes.service.ts ***!
+  \****************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var _a;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.NftcategoryesService = void 0;
+const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+const prisma_service_1 = __webpack_require__(/*! src/prisma/prisma.service */ "./src/prisma/prisma.service.ts");
+const client_1 = __webpack_require__(/*! @prisma/client */ "@prisma/client");
+let NftcategoryesService = class NftcategoryesService {
+    constructor(prismaService) {
+        this.prismaService = prismaService;
+    }
+    async createCategory(dto, user) {
+        if (!user.roles.includes(client_1.Role.ADMIN)) {
+            throw new common_1.ForbiddenException();
+        }
+        return this.prismaService.category.create({
+            data: {
+                name: dto.name,
+                nftid: dto.nftid
+            }
+        });
+    }
+    async editCateory(id, user, dto) {
+        if (!user.roles.includes(client_1.Role.ADMIN)) {
+            throw new common_1.ForbiddenException();
+        }
+        const nft = await this.prismaService.category.findFirst({ where: { id: id } });
+        if (!nft) {
+            throw new common_1.BadRequestException();
+        }
+        return this.prismaService.category.update({
+            where: { id: id },
+            data: dto,
+        });
+    }
+    async deleteCaregory(id, user) {
+        if (!user.roles.includes(client_1.Role.ADMIN)) {
+            throw new common_1.ForbiddenException();
+        }
+        return this.prismaService.category.delete({ where: { id: id } });
+    }
+};
+exports.NftcategoryesService = NftcategoryesService;
+exports.NftcategoryesService = NftcategoryesService = __decorate([
+    (0, common_1.Injectable)(),
+    __metadata("design:paramtypes", [typeof (_a = typeof prisma_service_1.PrismaService !== "undefined" && prisma_service_1.PrismaService) === "function" ? _a : Object])
+], NftcategoryesService);
 
 
 /***/ }),
@@ -1186,6 +1497,214 @@ exports.PrismaService = PrismaService;
 exports.PrismaService = PrismaService = __decorate([
     (0, common_1.Injectable)()
 ], PrismaService);
+
+
+/***/ }),
+
+/***/ "./src/stacking/auto.stacking.ts":
+/*!***************************************!*\
+  !*** ./src/stacking/auto.stacking.ts ***!
+  \***************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var _a, _b;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.AutoStakingService = void 0;
+const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+const cron = __webpack_require__(/*! node-cron */ "node-cron");
+const prisma_service_1 = __webpack_require__(/*! ../prisma/prisma.service */ "./src/prisma/prisma.service.ts");
+const stacking_service_1 = __webpack_require__(/*! ./stacking.service */ "./src/stacking/stacking.service.ts");
+let AutoStakingService = class AutoStakingService {
+    constructor(prismaService, stakingService) {
+        this.prismaService = prismaService;
+        this.stakingService = stakingService;
+        cron.schedule('0 0 * * *', async () => {
+            await this.autoStake();
+        });
+    }
+    async autoStake() {
+        try {
+            const usersAndNftCardsToStake = await this.getUsersAndNftCardsToStake();
+            for (const { userId, nftCardId, amount, adminParameters } of usersAndNftCardsToStake) {
+                await this.stakingService.stake(userId, nftCardId, amount, adminParameters);
+            }
+        }
+        catch (error) {
+            console.error('Error during auto-staking:', error);
+        }
+    }
+    async getUsersAndNftCardsToStake() {
+        const stakingData = await this.prismaService.staking.findMany({
+            where: { createdAt: { lte: new Date() } }
+        });
+        return stakingData.map((data) => ({
+            userId: data.userId,
+            nftCardId: data.nftId,
+            amount: data.amount,
+            adminParameters: data.adminParameters,
+        }));
+    }
+};
+exports.AutoStakingService = AutoStakingService;
+exports.AutoStakingService = AutoStakingService = __decorate([
+    (0, common_1.Injectable)(),
+    __metadata("design:paramtypes", [typeof (_a = typeof prisma_service_1.PrismaService !== "undefined" && prisma_service_1.PrismaService) === "function" ? _a : Object, typeof (_b = typeof stacking_service_1.StakingService !== "undefined" && stacking_service_1.StakingService) === "function" ? _b : Object])
+], AutoStakingService);
+
+
+/***/ }),
+
+/***/ "./src/stacking/stacking.controller.ts":
+/*!*********************************************!*\
+  !*** ./src/stacking/stacking.controller.ts ***!
+  \*********************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var __param = (this && this.__param) || function (paramIndex, decorator) {
+    return function (target, key) { decorator(target, key, paramIndex); }
+};
+var _a;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.StakingController = void 0;
+const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+const stacking_service_1 = __webpack_require__(/*! ./stacking.service */ "./src/stacking/stacking.service.ts");
+const client_1 = __webpack_require__(/*! @prisma/client */ "@prisma/client");
+const decorators_1 = __webpack_require__(/*! @common/common/decorators */ "./libs/common/src/decorators/index.ts");
+const roles_guard_1 = __webpack_require__(/*! src/auth/guards/roles.guard */ "./src/auth/guards/roles.guard.ts");
+let StakingController = class StakingController {
+    constructor(stakingService) {
+        this.stakingService = stakingService;
+    }
+    stake(data) {
+        return this.stakingService.stake(data.userId, data.nftCardId, data.amount, data.adminParameters);
+    }
+    getHistory(nftid) {
+        return this.stakingService.History(nftid);
+    }
+};
+exports.StakingController = StakingController;
+__decorate([
+    (0, common_1.UseGuards)(roles_guard_1.RolesGuard),
+    (0, decorators_1.Roles)(client_1.Role.ADMIN),
+    (0, common_1.Post)(),
+    __param(0, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", void 0)
+], StakingController.prototype, "stake", null);
+__decorate([
+    (0, common_1.UseGuards)(roles_guard_1.RolesGuard),
+    (0, decorators_1.Roles)(client_1.Role.ADMIN),
+    (0, common_1.Get)(':nftid/history'),
+    __param(0, (0, common_1.Param)('nftid')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", void 0)
+], StakingController.prototype, "getHistory", null);
+exports.StakingController = StakingController = __decorate([
+    (0, common_1.Controller)('staking'),
+    __metadata("design:paramtypes", [typeof (_a = typeof stacking_service_1.StakingService !== "undefined" && stacking_service_1.StakingService) === "function" ? _a : Object])
+], StakingController);
+
+
+/***/ }),
+
+/***/ "./src/stacking/stacking.module.ts":
+/*!*****************************************!*\
+  !*** ./src/stacking/stacking.module.ts ***!
+  \*****************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.StackingModule = void 0;
+const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+let StackingModule = class StackingModule {
+};
+exports.StackingModule = StackingModule;
+exports.StackingModule = StackingModule = __decorate([
+    (0, common_1.Module)({})
+], StackingModule);
+
+
+/***/ }),
+
+/***/ "./src/stacking/stacking.service.ts":
+/*!******************************************!*\
+  !*** ./src/stacking/stacking.service.ts ***!
+  \******************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var _a;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.StakingService = void 0;
+const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+const prisma_service_1 = __webpack_require__(/*! ../prisma/prisma.service */ "./src/prisma/prisma.service.ts");
+let StakingService = class StakingService {
+    static map(arg0) {
+        throw new Error('Method not implemented.');
+    }
+    constructor(prisma) {
+        this.prisma = prisma;
+    }
+    async stake(userId, nftId, amount, adminParameters) {
+        await this.prisma.staking.create({
+            data: {
+                userId,
+                nftId,
+                amount,
+                adminParameters,
+            },
+        });
+    }
+    async History(nftId) {
+        return this.prisma.staking.findMany({
+            where: { nftId },
+            orderBy: { createdAt: 'desc' },
+        });
+    }
+};
+exports.StakingService = StakingService;
+exports.StakingService = StakingService = __decorate([
+    (0, common_1.Injectable)(),
+    __metadata("design:paramtypes", [typeof (_a = typeof prisma_service_1.PrismaService !== "undefined" && prisma_service_1.PrismaService) === "function" ? _a : Object])
+], StakingService);
 
 
 /***/ }),
@@ -1568,6 +2087,16 @@ module.exports = require("date-fns");
 /***/ ((module) => {
 
 module.exports = require("express");
+
+/***/ }),
+
+/***/ "node-cron":
+/*!****************************!*\
+  !*** external "node-cron" ***!
+  \****************************/
+/***/ ((module) => {
+
+module.exports = require("node-cron");
 
 /***/ }),
 

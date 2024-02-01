@@ -55,6 +55,19 @@ model Category{
   @@map("categoryes")
 }
 
+model Staking {
+  id           String @id @default(uuid())
+  userId       String
+  nftId        String
+  amount       String
+  adminParameters Json
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+    
+}
+
+
 enum Role {
   ADMIN
   USER

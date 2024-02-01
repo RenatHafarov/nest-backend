@@ -1,0 +1,61 @@
+generator client {
+  
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  roles     Role[]
+  password  String
+  banned    Boolean  @default(false)
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+  Token     Token[]
+
+  @@map("users")
+}
+
+model Token {
+  token     String   @unique
+  exp       DateTime
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId    String
+  userAgent String   @map("user_agent")
+
+  @@map("tokens")
+}
+
+model Nft {
+  nftId          String @id @default(uuid())
+  name           String 
+  categoryes     String
+  description    String
+  stacking       Int
+  createdAt      DateTime @default(now()) @map("created_at")
+  updatedAt      DateTime @updatedAt @map("updated_at")
+
+
+  @@map("nfts")
+}
+
+
+model Category{
+  id             String @id @default(uuid())
+  name           String
+  nftid          String
+  createdAt      DateTime @default(now()) @map("created_at")
+  updatedAt      DateTime @updatedAt @map("updated_at")
+  
+  @@map("categoryes")
+}
+
+enum Role {
+  ADMIN
+  USER
+}
